@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Controllers\DonationController;
 use App\Http\Controllers\ProfileController;
+use App\Models\Donation;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -8,8 +10,16 @@ Route::get('/', function () {
 });
 
 Route::get('/user/{username}', function ($username) {
-    return view('profile', ['username' => $username]);
-})->name('profile');
+    return view('donation', ['username' => $username]);
+})->name('donation');
+
+Route::post('/invoice', [App\Http\Controllers\DonationController::class, 'createInvoice'])->name('invoice');
+Route::get('/user/{username}', [App\Http\Controllers\DonationController::class, 'index'])->name('donation');
+Route::post('/donate', [DonationController::class, 'store'])->name('donate.store');
+Route::get('/donation/success/{id}', function ($id) {
+    return view('success', ['donation' => Donation::findOrFail($id)]);
+})->name('donation.success');
+
 
 Route::get('/dashboard', function () {
     return view('dashboard');

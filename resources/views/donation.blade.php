@@ -19,13 +19,15 @@
     <div class="bg-gray-100">
         <div class="flex justify-center items-center h-screen w-full">
 
-            <form class="w-full max-w-2xl">
+            <form class="w-full max-w-2xl" id="donation-form" action="{{ route('donate.store') }}" method="POST">
+                <input type="hidden" name="user_id" value="{{ $user->id }}">
+                @csrf
                 <div class="space-y-12">
                     <div class="border-b border-gray-900/10 pb-12">
                         <div class="flex justify-between items-center gap-x-6">
                             <div>
                                 <h2 class="text-base/7 font-semibold text-gray-900">Kamu akan mengirimkan dukungan pada
-                                    {{ $username }}</h2>
+                                    {{ $user->username }}</h2>
                                 <p class="mt-1 text-sm/6 text-gray-600">Silahkan lengkapi data ini</p>
                             </div>
 
@@ -41,7 +43,7 @@
                             <div class="sm:col-span-full">
                                 <label for="name" class="block text-sm/6 font-medium text-gray-900">Nama</label>
                                 <div class="mt-2">
-                                    <input type="text" name="name" id="name" autocomplete="given-name"
+                                    <input type="text" name="name" id="name" required
                                         class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
                                         value="{{ auth()->check() ? auth()->user()->name : old('name') }}"
                                         @if(auth()->check()) readonly @endif>
@@ -49,33 +51,29 @@
                             </div>
 
                             <div class="sm:col-span-full">
-                                <label for="email" class="block text-sm/6 font-medium text-gray-900">Email
-                                    address</label>
+                                <label for="email" class="block text-sm/6 font-medium text-gray-900">Email</label>
                                 <div class="mt-2">
-                                    <input id="email" name="email" type="email" autocomplete="email"
+                                    <input type="email" name="email" id="email" required
                                         class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
                                         value="{{ auth()->check() ? auth()->user()->email : old('email') }}"
-                                        @if(auth()->check()) readonly @endif>
+                                        @if(auth()->check()) readonly
+                                    @endif>
                                 </div>
                             </div>
 
-
                             <div class="col-span-full">
-                                <label for="street-address"
-                                    class="block text-sm/6 font-medium text-gray-900">Nominal</label>
+                                <label for="amount" class="block text-sm/6 font-medium text-gray-900">Nominal</label>
                                 <div class="mt-2">
-                                    <input type="number" name="street-address" id="street-address"
-                                        autocomplete="street-address"
+                                    <input type="number" name="amount" id="amount" required
                                         class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
                                 </div>
                             </div>
+
                             <div class="col-span-full">
-                                <label for="street-address"
-                                    class="block text-sm/6 font-medium text-gray-900">Pesan</label>
+                                <label for="message" class="block text-sm/6 font-medium text-gray-900">Pesan</label>
                                 <div class="mt-2">
-                                    <input type="number" name="street-address" id="street-address"
-                                        autocomplete="street-address"
-                                        class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
+                                    <textarea name="message" id="message" required
+                                        class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"></textarea>
                                 </div>
                             </div>
                         </div>
