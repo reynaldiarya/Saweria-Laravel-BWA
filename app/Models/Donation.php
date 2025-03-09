@@ -12,7 +12,8 @@ class Donation extends Model
         'email',
         'amount',
         'message',
-        'status'
+        'status',
+        'phone_number'
     ];
 
     public function user()

@@ -11,11 +11,13 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Xendit\Configuration;
 use Xendit\Invoice\CreateInvoiceRequest;
 use Xendit\Invoice\InvoiceApi;
 use Xendit\Invoice\InvoiceItem;
+use Twilio\Rest\Client;
 
 class DonationController extends Controller
 {
@@ -36,8 +38,9 @@ class DonationController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255',
-            'amount' => 'required|integer|min:1000',
-            'message' => 'required|string'
+            'amount' => 'required|integer|min:1',
+            'message' => 'required|string',
+            'phone_number' => 'required|max:15',
         ]);
 
         DB::beginTransaction();
@@ -49,6 +52,7 @@ class DonationController extends Controller
                 'email' => $request->email,
                 'amount' => $request->amount,
                 'message' => $request->message,
+                'phone_number' => $request->phone_number,
                 'status' => 'pending'
             ]);
 
@@ -121,11 +125,35 @@ class DonationController extends Controller
         
         if ($request->status === 'PAID') {
             $payment->donation->update(['status' => 'completed']);
+            event(new DonationReceived($payment->donation));
+
+            $sid    = env('SID_TWILIO');
+            $token  = env('TOKEN_TWILIO');
+            $twilio = new Client($sid, $token);
+
+            try {
+                $message = $twilio->messages->create(
+                    "whatsapp:" . $payment->donation->phone_number, // to
+                    [
+                        "from" => "whatsapp:" . env('TWILIO_WHATSAPP_NUMBER'),
+                        "body" => "Thank you for your donation, " . $payment->donation->name . 
+                                ". Your donation has been received. You can check your payment details here: " . $payment->payment_url
+                    ]
+                );
+
+                // Cek apakah pesan berhasil dikirim
+                if ($message->sid) {
+                    Log::info('Twilio Message Sent: ' . $message->sid);
+                } else {
+                    Log::error('Twilio Message Failed to Send');
+                }
+            } catch (\Exception $e) {
+                Log::error('Twilio Error: ' . $e->getMessage());
+            }
         }
 
-        Mail::to($payment->donation->email)->queue(new DonationInvoiceMail($payment->donation, $payment));
 
-        event(new DonationReceived($payment->donation));
+        Mail::to($payment->donation->email)->queue(new DonationInvoiceMail($payment->donation, $payment));
 
         return response()->json([
             'status' => 'success',

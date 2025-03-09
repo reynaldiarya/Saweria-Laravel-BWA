@@ -47,6 +47,9 @@
                                         class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
                                         value="{{ auth()->check() ? auth()->user()->name : old('name') }}"
                                         @if(auth()->check()) readonly @endif>
+                                    @error('name')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                    @enderror
                                 </div>
                             </div>
 
@@ -56,8 +59,23 @@
                                     <input type="email" name="email" id="email" required
                                         class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
                                         value="{{ auth()->check() ? auth()->user()->email : old('email') }}"
-                                        @if(auth()->check()) readonly
-                                    @endif>
+                                        @if(auth()->check()) readonly @endif>
+                                    @error('email')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                    @enderror
+                                </div>
+                            </div>
+
+                            <div class="sm:col-span-full">
+                                <label for="phone_number" class="block text-sm/6 font-medium text-gray-900">Nomor
+                                    telepon</label>
+                                <div class="mt-2">
+                                    <input type="text" name="phone_number" id="phone_number" required
+                                        class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                                        value="{{ old('phone_number') }}">
+                                    @error('phone_number')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                    @enderror
                                 </div>
                             </div>
 
@@ -65,7 +83,11 @@
                                 <label for="amount" class="block text-sm/6 font-medium text-gray-900">Nominal</label>
                                 <div class="mt-2">
                                     <input type="number" name="amount" id="amount" required
-                                        class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
+                                        class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                                        value="{{ old('amount') }}">
+                                    @error('amount')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                    @enderror
                                 </div>
                             </div>
 
@@ -73,7 +95,10 @@
                                 <label for="message" class="block text-sm/6 font-medium text-gray-900">Pesan</label>
                                 <div class="mt-2">
                                     <textarea name="message" id="message" required
-                                        class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"></textarea>
+                                        class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">{{ old('message') }}</textarea>
+                                    @error('message')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                    @enderror
                                 </div>
                             </div>
                         </div>
