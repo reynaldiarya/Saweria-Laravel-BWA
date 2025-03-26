@@ -13,6 +13,7 @@
                 </div>
             </div>
 
+            @if(Auth::user()->page_id)
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mt-6 p-6">
                 <h3 class="text-lg font-semibold text-gray-700">Total Donasi yang Diterima</h3>
                 <p class="text-2xl font-bold text-green-600">
@@ -26,7 +27,7 @@
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mt-6 p-6">
                 <label for="profile-url" class="block text-sm font-medium text-gray-700">Profile URL</label>
                 <div class="flex mt-1">
-                    <input type="text" id="profile-url" value="{{ url('user/' . Auth::user()->username) }}"
+                    <input type="text" id="profile-url" value="{{ url('user/' . Auth::user()->page_id) }}"
                         class="form-input block w-full rounded-md shadow-sm border-gray-300 focus:border-indigo-500 focus:ring focus:ring-indigo-500 focus:ring-opacity-50"
                         readonly>
                     <button onclick="copyProfileUrl()"
@@ -35,6 +36,7 @@
                     </button>
                 </div>
             </div>
+            @endif
         </div>
     </div>
 

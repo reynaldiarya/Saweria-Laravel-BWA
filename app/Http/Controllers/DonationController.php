@@ -17,7 +17,6 @@ use Xendit\Configuration;
 use Xendit\Invoice\CreateInvoiceRequest;
 use Xendit\Invoice\InvoiceApi;
 use Xendit\Invoice\InvoiceItem;
-use Twilio\Rest\Client;
 
 class DonationController extends Controller
 {
@@ -26,9 +25,9 @@ class DonationController extends Controller
         Configuration::setXenditKey(env('XENDIT_API_KEY'));
     }
 
-    public function index($username)
+    public function index($pageId)
     {
-        $user = User::where('username', $username)->firstOrFail();
+        $user = User::where('page_id', $pageId)->firstOrFail();
         
         return view('donation', ['user' => $user]);
     }
@@ -40,7 +39,6 @@ class DonationController extends Controller
             'email' => 'required|email|max:255',
             'amount' => 'required|integer|min:1',
             'message' => 'required|string',
-            'phone_number' => 'required|max:15',
         ]);
 
         DB::beginTransaction();
@@ -52,7 +50,6 @@ class DonationController extends Controller
                 'email' => $request->email,
                 'amount' => $request->amount,
                 'message' => $request->message,
-                'phone_number' => $request->phone_number,
                 'status' => 'pending'
             ]);
 
@@ -63,19 +60,18 @@ class DonationController extends Controller
             ]);
 
             $createInvoice = new CreateInvoiceRequest([
-                'external_id' => 'donation_' . $donation->id,
+                'external_id' => 'donation_' . $donation->uuid,
                 'amount' => $request->amount,
                 'payer_email' => $request->email,
                 'invoice_duration' => 172800,
                 'items' => [$invoiceItems],
-                'success_redirect_url' => route('donation.success', ['id' => $donation->id])
+                'success_redirect_url' => route('donation.success', ['uuid' => $donation->uuid])
             ]);
 
             $apiInstance = new InvoiceApi();
             $generateInvoice = $apiInstance->createInvoice($createInvoice);
-
             $payment = Payment::create([
-                'donation_id' => $donation->id,
+                'donation_id' => $donation->uuid,
                 'payment_id' => $generateInvoice['id'],
                 'payment_method' => 'Xendit',
                 'status' => 'pending',
@@ -102,15 +98,15 @@ class DonationController extends Controller
 
     public function notificationCallback(Request $request)
     {
-        $getToken = $request->header('x-callback-token');
-        $callbackToken = env('XENDIT_CALLBACK_TOKEN');
+        // $getToken = $request->header('x-callback-token');
+        // $callbackToken = env('XENDIT_CALLBACK_TOKEN');
 
-        if (!$callbackToken || $getToken !== $callbackToken) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Invalid callback token'
-            ], Response::HTTP_UNAUTHORIZED);
-        }
+        // if (!$callbackToken || $getToken !== $callbackToken) {
+        //     return response()->json([
+        //         'status' => 'error',
+        //         'message' => 'Invalid callback token'
+        //     ], Response::HTTP_UNAUTHORIZED);
+        // }
 
         $payment = Payment::where('payment_id', $request->id)->first();
 
@@ -126,30 +122,6 @@ class DonationController extends Controller
         if ($request->status === 'PAID') {
             $payment->donation->update(['status' => 'completed']);
             event(new DonationReceived($payment->donation));
-
-            $sid    = env('SID_TWILIO');
-            $token  = env('TOKEN_TWILIO');
-            $twilio = new Client($sid, $token);
-
-            try {
-                $message = $twilio->messages->create(
-                    "whatsapp:" . $payment->donation->phone_number, // to
-                    [
-                        "from" => "whatsapp:" . env('TWILIO_WHATSAPP_NUMBER'),
-                        "body" => "Thank you for your donation, " . $payment->donation->name . 
-                                ". Your donation has been received. You can check your payment details here: " . $payment->payment_url
-                    ]
-                );
-
-                // Cek apakah pesan berhasil dikirim
-                if ($message->sid) {
-                    Log::info('Twilio Message Sent: ' . $message->sid);
-                } else {
-                    Log::error('Twilio Message Failed to Send');
-                }
-            } catch (\Exception $e) {
-                Log::error('Twilio Error: ' . $e->getMessage());
-            }
         }
 
 

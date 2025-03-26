@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('payments', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('donation_id')->constrained();
+            $table->uuid()->primary()->unique();
+            $table->foreignUuid('donation_id')->references('uuid')->on('donations')->restrictOnDelete();
             $table->string('payment_id')->unique();
             $table->string('payment_method');
             $table->string('status');

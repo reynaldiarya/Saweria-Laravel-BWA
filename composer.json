@@ -14,7 +14,6 @@
         "laravel/reverb": "^1.0",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.9",
-        "twilio/sdk": "^8.3",
         "xendit/xendit-php": "^6.2"
     },
     "require-dev": {

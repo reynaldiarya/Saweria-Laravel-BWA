@@ -20,7 +20,7 @@
         <div class="flex justify-center items-center h-screen w-full">
 
             <form class="w-full max-w-2xl" id="donation-form" action="{{ route('donate.store') }}" method="POST">
-                <input type="hidden" name="user_id" value="{{ $user->id }}">
+                <input type="hidden" name="user_id" value="{{ $user->uuid }}">
                 @csrf
                 <div class="space-y-12">
                     <div class="border-b border-gray-900/10 pb-12">
@@ -61,19 +61,6 @@
                                         value="{{ auth()->check() ? auth()->user()->email : old('email') }}"
                                         @if(auth()->check()) readonly @endif>
                                     @error('email')
-                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                    @enderror
-                                </div>
-                            </div>
-
-                            <div class="sm:col-span-full">
-                                <label for="phone_number" class="block text-sm/6 font-medium text-gray-900">Nomor
-                                    telepon</label>
-                                <div class="mt-2">
-                                    <input type="text" name="phone_number" id="phone_number" required
-                                        class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
-                                        value="{{ old('phone_number') }}">
-                                    @error('phone_number')
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                     @enderror
                                 </div>
