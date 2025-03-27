@@ -24,7 +24,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'username',
+        'accepting_donation',
         'page_id',
     ];
 
@@ -53,6 +53,6 @@ class User extends Authenticatable
 
     public function donations()
     {
-        return $this->hasMany(Donation::class, 'uuid');
+        return $this->hasMany(Donation::class, 'user_id');
     }
 }

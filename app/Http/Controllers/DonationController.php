@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Events\DonationReceived;
 use App\Jobs\SendDonationInvoiceMail;
-use App\Mail\DonationInvoiceMail;
+use App\Mail\DonationInvoice;
 use App\Models\Donation;
 use App\Models\Payment;
 use App\Models\User;
@@ -28,7 +28,7 @@ class DonationController extends Controller
     public function index($pageId)
     {
         $user = User::where('page_id', $pageId)->firstOrFail();
-        
+
         return view('donation', ['user' => $user]);
     }
 
@@ -37,7 +37,7 @@ class DonationController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255',
-            'amount' => 'required|integer|min:1',
+            'amount' => 'required|string',
             'message' => 'required|string',
         ]);
 
@@ -48,20 +48,20 @@ class DonationController extends Controller
                 'user_id' => $request->user_id,
                 'name' => $request->name,
                 'email' => $request->email,
-                'amount' => $request->amount,
+                'amount' => (int) str_replace(['Rp', '.', ','], '', $request->amount),
                 'message' => $request->message,
                 'status' => 'pending'
             ]);
 
             $invoiceItems = new InvoiceItem([
                 'name' => 'Donation',
-                'price' => $request->amount,
+                'price' => (int) str_replace(['Rp', '.', ','], '', $request->amount),
                 'quantity' => 1
             ]);
 
             $createInvoice = new CreateInvoiceRequest([
                 'external_id' => 'donation_' . $donation->uuid,
-                'amount' => $request->amount,
+                'amount' => (int) str_replace(['Rp', '.', ','], '', $request->amount),
                 'payer_email' => $request->email,
                 'invoice_duration' => 172800,
                 'items' => [$invoiceItems],
@@ -77,10 +77,10 @@ class DonationController extends Controller
                 'status' => 'pending',
                 'payment_url' => $generateInvoice['invoice_url']
             ]);
-            
-            // SendDonationInvoiceMail::dispatch($donation, $payment);
 
-            Mail::to($donation->email)->queue(new DonationInvoiceMail($donation, $payment));
+            SendDonationInvoiceMail::dispatch($donation, $payment);
+
+            // Mail::to($donation->email)->queue(new DonationInvoice($donation, $payment));
 
 
             DB::commit();
@@ -116,16 +116,27 @@ class DonationController extends Controller
                 'message' => 'Payment not found'
             ], Response::HTTP_NOT_FOUND);
         }
+        SendDonationInvoiceMail::dispatch($payment->donation, $payment);
 
-        $payment->update(['status' => $request->status === 'PAID' ? 'completed' : 'failed']);
-        
-        if ($request->status === 'PAID') {
-            $payment->donation->update(['status' => 'completed']);
-            event(new DonationReceived($payment->donation));
+        if ($payment->status == 'pending') {
+            $payment->update(['status' => $request->status === 'PAID' ? 'completed' : 'failed']);
+
+            if ($request->status === 'PAID') {
+                $payment->donation->update(['status' => 'completed']);
+                event(new DonationReceived($payment->donation));
+                // Mail::to($payment->donation->email)->queue(new DonationInvoice($payment->donation, $payment));
+            }
+        } elseif ($payment->status == 'completed') {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Payment has been paid'
+            ], Response::HTTP_NOT_FOUND);
+        } else {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Payment error'
+            ], Response::HTTP_NOT_FOUND);
         }
-
-
-        Mail::to($payment->donation->email)->queue(new DonationInvoiceMail($payment->donation, $payment));
 
         return response()->json([
             'status' => 'success',

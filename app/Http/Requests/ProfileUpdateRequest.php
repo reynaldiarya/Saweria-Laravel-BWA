@@ -25,7 +25,15 @@ class ProfileUpdateRequest extends FormRequest
                 'max:255',
                 Rule::unique(User::class, 'email')->ignore($this->user()->uuid, 'uuid'),
             ],
-            'page_id' => ['string', 'lowercase', 'max:255', Rule::unique(User::class, 'page_id')->ignore($this->user()->page_id, 'page_id'),],
+            'page_id' => ['required', 'string', 'lowercase', 'max:255', Rule::unique(User::class, 'page_id')->ignore($this->user()->page_id, 'page_id'),],
+            'accepting_donation' => 'sometimes|boolean',
         ];
+    }
+
+    protected function prepareForValidation()
+    {
+        $this->merge([
+            'accepting_donation' => $this->has('accepting_donation'), // Konversi ke boolean
+        ]);
     }
 }

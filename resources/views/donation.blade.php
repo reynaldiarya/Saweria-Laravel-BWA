@@ -27,15 +27,15 @@
                         <div class="flex justify-between items-center gap-x-6">
                             <div>
                                 <h2 class="text-base/7 font-semibold text-gray-900">Kamu akan mengirimkan dukungan pada
-                                    {{ $user->username }}</h2>
+                                    {{ $user->name }}</h2>
                                 <p class="mt-1 text-sm/6 text-gray-600">Silahkan lengkapi data ini</p>
                             </div>
 
                             @guest
-                            <a href="{{ route('login') }}"
-                                class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
-                                Log in
-                            </a>
+                                <a href="{{ route('login') }}"
+                                    class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+                                    Log in
+                                </a>
                             @endguest
                         </div>
 
@@ -46,9 +46,9 @@
                                     <input type="text" name="name" id="name" required
                                         class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
                                         value="{{ auth()->check() ? auth()->user()->name : old('name') }}"
-                                        @if(auth()->check()) readonly @endif>
+                                        @if (auth()->check()) readonly @endif>
                                     @error('name')
-                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                     @enderror
                                 </div>
                             </div>
@@ -59,9 +59,9 @@
                                     <input type="email" name="email" id="email" required
                                         class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
                                         value="{{ auth()->check() ? auth()->user()->email : old('email') }}"
-                                        @if(auth()->check()) readonly @endif>
+                                        @if (auth()->check()) readonly @endif>
                                     @error('email')
-                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                     @enderror
                                 </div>
                             </div>
@@ -69,11 +69,12 @@
                             <div class="col-span-full">
                                 <label for="amount" class="block text-sm/6 font-medium text-gray-900">Nominal</label>
                                 <div class="mt-2">
-                                    <input type="number" name="amount" id="amount" required
+                                    <input type="text" name="amount" id="amount" required
+                                        onkeyup="addCurrency(this)"
                                         class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
                                         value="{{ old('amount') }}">
                                     @error('amount')
-                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                     @enderror
                                 </div>
                             </div>
@@ -84,7 +85,7 @@
                                     <textarea name="message" id="message" required
                                         class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">{{ old('message') }}</textarea>
                                     @error('message')
-                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                     @enderror
                                 </div>
                             </div>
@@ -99,7 +100,20 @@
             </form>
         </div>
     </div>
-
+    <script>
+        function addCurrency(element) {
+            // Ambil nilai input
+            let value = element.value;
+            // Hapus karakter selain angka
+            value = value.replace(/[^\d]/g, '');
+            // Tambahkan titik sebagai pemisah ribuan
+            value = value.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+            // Tambahkan "Rp." di depan nilai
+            value = "Rp" + value;
+            // Assign nilai yang sudah diubah kembali ke input
+            element.value = value;
+        }
+    </script>
 </body>
 
 </html>

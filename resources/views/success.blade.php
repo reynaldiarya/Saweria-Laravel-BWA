@@ -19,7 +19,7 @@
     <div class="bg-gray-100">
         <div class="flex justify-center items-center h-screen w-full flex-col space-y-4 gap-3">
             <h1>Terima kasih atas donasi Anda!</h1>
-            <p>Donasi untuk {{ $donation->user->username }} telah berhasil.</p>
+            <p>Donasi untuk {{ $donation->user->name }} telah berhasil.</p>
             <a href="{{ url('/') }}"
                 class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Kembali
                 ke Beranda</a>

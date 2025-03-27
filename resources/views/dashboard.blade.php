@@ -13,29 +13,29 @@
                 </div>
             </div>
 
-            @if(Auth::user()->page_id)
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mt-6 p-6">
-                <h3 class="text-lg font-semibold text-gray-700">Total Donasi yang Diterima</h3>
-                <p class="text-2xl font-bold text-green-600">
-                    Rp <span id="total-donation">{{ number_format(Auth::user()->donations()->where('status',
-                        'completed')->sum('amount'), 0, ',', '.') }}</span>
-                    <span id="donation-update"
-                        class="text-lg font-semibold text-green-500 transition-opacity opacity-0"></span>
-                </p>
-            </div>
-
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mt-6 p-6">
-                <label for="profile-url" class="block text-sm font-medium text-gray-700">Profile URL</label>
-                <div class="flex mt-1">
-                    <input type="text" id="profile-url" value="{{ url('user/' . Auth::user()->page_id) }}"
-                        class="form-input block w-full rounded-md shadow-sm border-gray-300 focus:border-indigo-500 focus:ring focus:ring-indigo-500 focus:ring-opacity-50"
-                        readonly>
-                    <button onclick="copyProfileUrl()"
-                        class="ml-2 px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700 focus:outline-none focus:ring focus:ring-indigo-500 focus:ring-opacity-50">
-                        Copy
-                    </button>
+            @if (Auth::user()->accepting_donation && Auth::user()->page_id)
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mt-6 p-6">
+                    <h3 class="text-lg font-semibold text-gray-700">Total Donasi yang Diterima</h3>
+                    <p class="text-2xl font-bold text-green-600">
+                        Rp <span
+                            id="total-donation">{{ number_format(Auth::user()->donations()->where('status', 'completed')->sum('amount'), 0, ',', '.') }}</span>
+                        <span id="donation-update"
+                            class="text-lg font-semibold text-green-500 transition-opacity opacity-0"></span>
+                    </p>
                 </div>
-            </div>
+
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mt-6 p-6">
+                    <label for="profile-url" class="block text-sm font-medium text-gray-700">Profile URL</label>
+                    <div class="flex mt-1">
+                        <input type="text" id="profile-url" value="{{ url('user/' . Auth::user()->page_id) }}"
+                            class="form-input block w-full rounded-md shadow-sm border-gray-300 focus:border-indigo-500 focus:ring focus:ring-indigo-500 focus:ring-opacity-50"
+                            readonly>
+                        <button onclick="copyProfileUrl()"
+                            class="ml-2 px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700 focus:outline-none focus:ring focus:ring-indigo-500 focus:ring-opacity-50">
+                            Copy
+                        </button>
+                    </div>
+                </div>
             @endif
         </div>
     </div>
@@ -44,47 +44,50 @@
         function copyProfileUrl() {
             let copyText = document.getElementById("profile-url");
             copyText.select();
-            copyText.setSelectionRange(0, 99999); 
+            copyText.setSelectionRange(0, 99999);
             navigator.clipboard.writeText(copyText.value);
             alert("Copied: " + copyText.value);
         }
     </script>
     @push('script-head')
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const userId = {{ Auth::id() }};
-            const totalDonationEl = document.getElementById("total-donation");
-            const donationUpdateEl = document.getElementById("donation-update");
-    
-            window.Echo.private(`donations.user.${userId}`)
-                .listen('DonationReceived', (data) => {
-                    const donation = data.donation;
-                    const newAmount = parseInt(donation.amount);
-    
-                    let currentTotal = parseInt(totalDonationEl.innerText.replace(/\./g, ""));
-                    let updatedTotal = currentTotal + newAmount;
-    
-                    donationUpdateEl.innerText = `+ Rp ${newAmount.toLocaleString("id-ID")}`;
-                    donationUpdateEl.style.opacity = "1";
-                    donationUpdateEl.style.transition = "opacity 0.5s ease-in-out";
-    
-                    setTimeout(() => {
-                        donationUpdateEl.style.opacity = "0";
-                    }, 10000);
-    
-                    totalDonationEl.innerText = updatedTotal.toLocaleString("id-ID");
-    
-                    Swal.fire({
-                        title: "🎉 Donasi Baru Diterima!",
-                        html: `<p><strong>Rp ${newAmount.toLocaleString("id-ID")}</strong> dari <strong>${donation.name}</strong></p>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.16.1/sweetalert2.all.min.js"
+            integrity="sha512-xY6WH58rPXt0+5LumlzGmgubLDO+SnuAqjBRO6i1B0VTFFSZR/aXszP6xjdT431rS24D8ztDPVjVPHb3Se9f6Q=="
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const userId = "{{ Auth::id() }}";
+                const totalDonationEl = document.getElementById("total-donation");
+                const donationUpdateEl = document.getElementById("donation-update");
+
+                window.Echo.private(`donations.user.${userId}`)
+                    .listen('.donation.received', (data) => {
+                        console.log(data)
+                        const donation = data.donation;
+                        const newAmount = parseInt(donation.amount);
+
+                        let currentTotal = parseInt(totalDonationEl.innerText.replace(/\./g, ""));
+                        let updatedTotal = currentTotal + newAmount;
+
+                        donationUpdateEl.innerText = `+ Rp ${newAmount.toLocaleString("id-ID")}`;
+                        donationUpdateEl.style.opacity = "1";
+                        donationUpdateEl.style.transition = "opacity 0.5s ease-in-out";
+
+                        setTimeout(() => {
+                            donationUpdateEl.style.opacity = "0";
+                        }, 10000);
+
+                        totalDonationEl.innerText = updatedTotal.toLocaleString("id-ID");
+                        console.log('tes')
+                        Swal.fire({
+                            title: "🎉 Donasi Baru Diterima!",
+                            html: `<p><strong>Rp ${newAmount.toLocaleString("id-ID")}</strong> dari <strong>${donation.name}</strong></p>
                                <p>"${donation.message}"</p>`,
-                        icon: "success",
-                        showConfirmButton: false,
-                        timer: 5000
+                            icon: "success",
+                            showConfirmButton: false,
+                            timer: 5000
+                        });
                     });
-                });
-        });
-    </script>
+            });
+        </script>
     @endpush
 </x-app-layout>

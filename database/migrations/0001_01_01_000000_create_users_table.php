@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->uuid()->primary()->unique();
             $table->string('name');
-            $table->string('username');
-            $table->string('page_id')->nullable();
+            $table->string('page_id')->unique();
+            $table->boolean('accepting_donation')->default(0);
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');

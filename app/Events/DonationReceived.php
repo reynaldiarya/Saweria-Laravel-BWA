@@ -35,4 +35,9 @@ class DonationReceived implements ShouldBroadcast
             ]
         ];
     }
+
+    public function broadcastAs()
+    {
+        return 'donation.received'; // Harus sama dengan di frontend!
+    }
 }
